@@ -96,14 +96,13 @@
 
 
 
-  <meta name="description" content="主要参考文章Redis深度历险和Redis设计与实现  Redis底层数据结构 即redis的底层数据结构,包含其组成,扩展等原理主要的几种数据结构为sds简单动态字符串,链表,字典,跳跃表,整数集合,压缩列表,对象等,此外还有hyperLoglog,bitMap位图等  sds1面试问题:https://juejin.im/post/5ca9d8ae6fb9a05e5c05c4e8?utm_s">
-<meta name="keywords" content="redis,数据结构">
+  <meta name="keywords" content="redis,数据结构">
 <meta property="og:type" content="article">
 <meta property="og:title" content="我知我见之Redis数据结构">
 <meta property="og:url" content="http://yoursite.com/2019/05/30/我知我见之Redis数据结构/index.html">
 <meta property="og:site_name" content="Sirierx blog">
-<meta property="og:description" content="主要参考文章Redis深度历险和Redis设计与实现  Redis底层数据结构 即redis的底层数据结构,包含其组成,扩展等原理主要的几种数据结构为sds简单动态字符串,链表,字典,跳跃表,整数集合,压缩列表,对象等,此外还有hyperLoglog,bitMap位图等  sds1面试问题:https://juejin.im/post/5ca9d8ae6fb9a05e5c05c4e8?utm_s">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://s2.ax1x.com/2019/05/30/VMfYGV.png">
 <meta property="og:image" content="https://s2.ax1x.com/2019/05/30/VMsbFO.png">
 <meta property="og:image" content="https://s2.ax1x.com/2019/05/30/VM6MDI.md.jpg">
 <meta property="og:image" content="https://s2.ax1x.com/2019/05/30/VM6Qbt.jpg">
@@ -111,11 +110,10 @@
 <meta property="og:image" content="https://s2.ax1x.com/2019/05/30/VM6nvd.jpg">
 <meta property="og:image" content="https://s2.ax1x.com/2019/05/30/VM6mgH.jpg">
 <meta property="og:image" content="https://s2.ax1x.com/2019/05/30/VM6KKA.jpg">
-<meta property="og:updated_time" content="2019-05-30T10:34:33.916Z">
+<meta property="og:updated_time" content="2019-05-30T11:25:28.029Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="我知我见之Redis数据结构">
-<meta name="twitter:description" content="主要参考文章Redis深度历险和Redis设计与实现  Redis底层数据结构 即redis的底层数据结构,包含其组成,扩展等原理主要的几种数据结构为sds简单动态字符串,链表,字典,跳跃表,整数集合,压缩列表,对象等,此外还有hyperLoglog,bitMap位图等  sds1面试问题:https://juejin.im/post/5ca9d8ae6fb9a05e5c05c4e8?utm_s">
-<meta name="twitter:image" content="https://s2.ax1x.com/2019/05/30/VMsbFO.png">
+<meta name="twitter:image" content="https://s2.ax1x.com/2019/05/30/VMfYGV.png">
 
 
 
@@ -421,7 +419,7 @@
                 
               
 
-              <time title="创建时间：2019-05-30 18:11:30 / 修改时间：18:34:33" itemprop="dateCreated datePublished" datetime="2019-05-30T18:11:30+08:00">2019-05-30</time>
+              <time title="创建时间：2019-05-30 18:11:30 / 修改时间：19:25:28" itemprop="dateCreated datePublished" datetime="2019-05-30T18:11:30+08:00">2019-05-30</time>
             
 
             
@@ -489,7 +487,8 @@
       
 
       
-        <blockquote>
+        <p><img src="https://s2.ax1x.com/2019/05/30/VMfYGV.png" alt="VMfYGV.png"><br><a id="more"></a></p>
+<blockquote>
 <p>主要参考文章<code>Redis深度历险</code>和<code>Redis设计与实现</code></p>
 </blockquote>
 <h2 id="Redis底层数据结构"><a href="#Redis底层数据结构" class="headerlink" title="Redis底层数据结构"></a>Redis底层数据结构</h2><blockquote>
