@@ -592,6 +592,232 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/05/30/我知我见之Redis数据结构/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Sirierx">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sirierx blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/05/30/我知我见之Redis数据结构/" class="post-title-link" itemprop="url">未命名</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-30 18:11:30 / 修改时间：18:23:39" itemprop="dateCreated datePublished" datetime="2019-05-30T18:11:30+08:00">2019-05-30</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/redis/" itemprop="url" rel="index"><span itemprop="name">redis</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+            <span id="/2019/05/30/我知我见之Redis数据结构/" class="leancloud_visitors" data-flag-title>
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              
+                <span class="post-meta-item-text">阅读次数：</span>
+              
+                <span class="leancloud-visitors-count"></span>
+            </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <blockquote>
+<p>主要参考文章<code>Redis深度历险</code>和<code>Redis设计与实现</code></p>
+</blockquote>
+<hr>
+<h2 id="Redis底层数据结构"><a href="#Redis底层数据结构" class="headerlink" title="Redis底层数据结构"></a>Redis底层数据结构</h2><blockquote>
+<p>即redis的底层数据结构,包含其组成,扩展等原理<br>主要的几种数据结构为<code>sds简单动态字符串</code>,<code>链表</code>,<code>字典</code>,<code>跳跃表</code>,<code>整数集合</code>,<code>压缩列表</code>,<code>对象</code>等,此外还有<code>hyperLoglog</code>,<code>bitMap位图</code>等</p>
+</blockquote>
+<h3 id="sds"><a href="#sds" class="headerlink" title="sds"></a>sds</h3><blockquote>
+<p>面试问题:<a href="https://juejin.im/post/5ca9d8ae6fb9a05e5c05c4e8?utm_source=gold_browser_extension" target="_blank" rel="noopener">https://juejin.im/post/5ca9d8ae6fb9a05e5c05c4e8?utm_source=gold_browser_extension</a></p>
+</blockquote>
+<h5 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h5><p>sds是redis基于C语言的字符串进一步优化的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">struct sdshdr &#123;</span><br><span class="line">	int len;// 已使用的字符串长度</span><br><span class="line">	int free;// 未使用的字符串长度</span><br><span class="line">	char buf[];// 字节数组，用于保存字符串本数据</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://s2.ax1x.com/2019/05/30/VMsbFO.png" alt="VMsbFO.png"><br>如上,redis的sds结构</p>
+<h5 id="与C字符串的对比"><a href="#与C字符串的对比" class="headerlink" title="与C字符串的对比"></a>与C字符串的对比</h5><ol>
+<li>时间复杂度<br> c字符串查询字符串长度的时间复杂度是O(N),需要对每个数进行计数<br> sds的查询长度的时间复杂度是O(1),其维护了字段len来计算其长度</li>
+<li>缓冲区溢出问题<br> c语言不记录本身数据长度,在扩容时候,非常容易造成缓冲区溢出(即分配过多内存)<br> 而sds因为记录了本身的长度,在空间分配策略/扩容时能杜绝溢出的可能,在低于512M大小时,不会溢出(sds是先扩容,再修改)</li>
+<li>修改的性能<br> c语言在每次修改数据时(增删改),会从新分配内存,容易出现扩容内存溢出,截断内存泄漏等问题<br> sds不需要反复的进行内存分配,因为sds采用的是空间预分配+懒性空间释放机制,(参见下方的扩容机制)</li>
+</ol>
+<h5 id="扩容机制"><a href="#扩容机制" class="headerlink" title="扩容机制"></a>扩容机制</h5><p> 采用的是<strong>空间预分配</strong>和<strong>懒性空间释放</strong>策略</p>
+<ol>
+<li>预分配<br>在字符串长度小于1M的时候,其扩容是加倍扩容,即会保留100%的冗余空间<br>在字符串长度超过1M之后,每次扩容只会多分配1M的冗余空间</li>
+<li>懒性释放<br>上述的冗余空间的意思是,不仅会分配新数据所需空间,还会分配free的空间备用<br>而懒性空间释放,不是直接释放,而是将空出的空间记录在free上,以待后续使用</li>
+</ol>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><p><a href="https://imgchr.com/i/VM6MDI" target="_blank" rel="noopener"><img src="https://s2.ax1x.com/2019/05/30/VM6MDI.md.jpg" alt="VM6MDI.md.jpg"></a></p>
+<h3 id="链表LinkedList"><a href="#链表LinkedList" class="headerlink" title="链表LinkedList"></a>链表LinkedList</h3><blockquote>
+<p>在redis中链表使用非常频繁,在其他数据结构也使用了链表,在基本数据类型中列表的本质就是链表,而非数组</p>
+</blockquote>
+<h5 id="结构-1"><a href="#结构-1" class="headerlink" title="结构"></a>结构</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">typedef struct listNode &#123;</span><br><span class="line">	struct listNode  *  prev; // 前置节点</span><br><span class="line">	struct listNode  *  next; // 后置节点</span><br><span class="line">	void  *  value;// 节点的值</span><br><span class="line">&#125;listNode;//链表节点</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">typedef struct list &#123;</span><br><span class="line">listNode  *  head;	// 表头节点</span><br><span class="line">listNode  *  tail;	// 表尾节点</span><br><span class="line">unsigned long len;	// 链表所包含的节点数量</span><br><span class="line">void  * ( * dup)(void  * ptr);	// 节点值复制函数</span><br><span class="line">void ( * free)(void  * ptr);	// 节点值释放函数</span><br><span class="line">int ( * match)(void  * ptr,void  * key);// 节点值对比函数</span><br><span class="line">&#125; list;//链表</span><br></pre></td></tr></table></figure>
+<p>多个链表节点互联组成双向链表<br><img src="https://s2.ax1x.com/2019/05/30/VM6Qbt.jpg" alt="VM6Qbt.jpg"></p>
+<h5 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h5><p>1.redis的链表特性,其一就是双端,如此获取前后节点的时间复杂度都是O(1)<br>2.无环,即表头或者表尾,总有一个prev或者next指向NULL,不会造成环状<br>3.链表自带计数器,其自带len属性,获取其长度的时间复杂度为O(1)</p>
+<h3 id="字典dirt"><a href="#字典dirt" class="headerlink" title="字典dirt"></a>字典dirt</h3><blockquote>
+<p>字段是redis使用最多的数据结构,字典的本质就是hash,结构类似于java的hashMap<br>全局所有的key,value也组成了一个字段,过期的key也组成了一个字典<br>zset的score和value的关系映射也用到了字典<br>字典的底层是由哈希表hash实现的,一个哈希表由多个哈希节点组成,一个哈希节点存放一个字典的键值对</p>
+</blockquote>
+<h5 id="结构-2"><a href="#结构-2" class="headerlink" title="结构"></a>结构</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">typedef struct dictht &#123;</span><br><span class="line">    dictEntry **table;     // 哈希表数组</span><br><span class="line">    unsigned long size;    // 哈希表大小</span><br><span class="line">    unsigned long sizemask;//hash掩码</span><br><span class="line">    unsigned long used;//已有节点数量</span><br><span class="line">&#125; dictht;//哈希表</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">typedef struct dictEntry &#123;</span><br><span class="line">    void *key; // 键</span><br><span class="line">    union &#123;</span><br><span class="line">        void *val;</span><br><span class="line">        uint64_t u64;</span><br><span class="line">        int64_t s64;</span><br><span class="line">    &#125; v;	// 值</span><br><span class="line">    struct dictEntry *next;    // 指向下个哈希表节点，形成链表</span><br><span class="line"></span><br><span class="line">&#125; dictEntry;//哈希表节点</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">typedef struct dict &#123;</span><br><span class="line">    dictType *type;    // 类型特定函数</span><br><span class="line">    void *privdata;    // 私有数据</span><br><span class="line">    dictht ht[2];    // 哈希表(两个表,一个常用,一个rehash时使用)</span><br><span class="line">    int rehashidx;     // rehash 索引(为-1时,不进行rehash)</span><br><span class="line">&#125; dict;//字典</span><br></pre></td></tr></table></figure>
+<p>如上<br>1.分别为哈希表,哈希节点和字典,可以看出字典对象的主体就是哈希表对象,此外还维护了一些诸如函数和rehash索引的数据<br>2.可以看出,字典的组成与java的hashmap组成基本一致,同属于数组+链表的结构<br>其中数组默认<strong>维护了两份哈希表</strong>,其一为常用存储,另外一个是在rehash的时候使用的</p>
+<h4 id="链表冲突"><a href="#链表冲突" class="headerlink" title="链表冲突"></a>链表冲突</h4><p>在多个键分配到同一数组的哈希表的同一索引上时,会发生冲突的,而哈希表对于这个冲突,采取的是链地址法来解决冲突的,没个哈希表节点维护了一个next指针,多个节点通过这个指针组成链表<br><img src="https://s2.ax1x.com/2019/05/30/VM6ZCD.jpg" alt="VM6ZCD.jpg"></p>
+<h4 id="渐进式rehash"><a href="#渐进式rehash" class="headerlink" title="渐进式rehash"></a>渐进式rehash</h4><blockquote>
+<p>redis中比较考究的一个知识点,就是渐进式rehash<br>在扩容/收缩的时候,需要重新计算hash值,并重新分配,非常耗时,所以redis便采取渐进式rehash策略<br>rehash使用到了字典的两个哈希表<br>redis的扩容条件:当hash中元素等于链表中元素时就会扩容<br>redis的缩容条件:只占有10%的时候</p>
+</blockquote>
+<p>简单的过程如下:</p>
+<blockquote>
+<p>1.在扩容时,会通过计算,得出新的需要的内存大小,并将此大小分配给h1表<br>2.然后将h0的已有键值对数据,同步到h1的表中去,此同步过程,需要重新计算hash值并分配位置<br>3.此时,释放h0表,然后将h1表置为h0表作为使用,并新开辟一个h1表做待用,如此完成渐进式rehash过程</p>
+</blockquote>
+<p><img src="https://s2.ax1x.com/2019/05/30/VM6nvd.jpg" alt="VM6nvd.jpg"><br><img src="https://s2.ax1x.com/2019/05/30/VM6mgH.jpg" alt="VM6mgH.jpg"></p>
+<p>上述是hash表的rehash过程,但需要知道的是,rehash过程,不是一蹴而就的,是分多次,渐进式的把数据同步过去的</p>
+<p>具体的过程如下:</p>
+<blockquote>
+<p>1.为字典的h1分配计算后的空间,让字典同时持有两块hash表<br>2.将字段持有的rehashidx标识置为0(默认为-1),标识rehash开始<br>3.在rehash的数据同步阶段,任何对h0表的在索引rehashidx上的键的修改,都会同步rehash到h1表中,并将rehashidx的值加1(rehashidx记录进度)<br>4.<strong>rehash过程中,任何查询/删除/修改,都会同时作用两张表去查询的,而新增会直接作用在h1表中,保证h0只减不增,随着rehash变成空表</strong><br>5.rehash完成后,将rehashinx置为-1,标识rehash结束</p>
+</blockquote>
+<p><img src="https://s2.ax1x.com/2019/05/30/VM6KKA.jpg" alt="VM6KKA.jpg"></p>
+<h3 id="跳跃表"><a href="#跳跃表" class="headerlink" title="跳跃表"></a>跳跃表</h3><ul>
+<li>TODO</li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/05/29/hello/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -963,7 +1189,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-count">4</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1101,7 +1327,7 @@
 <span class="post-meta-divider">|</span>
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count">博客全站共1.8k字</span>
+  <span class="post-count">博客全站共3.5k字</span>
 </div>
 
         
